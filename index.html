@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Raghwendra Mishra — Cost Optimization Log</title>
+<meta name="description" content="A running log of cloud cost optimizations by Raghwendra Mishra, Cloud FinOps professional." />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #0a0f0d;
+    --panel: #101815;
+    --panel-2: #131e19;
+    --border: #223028;
+    --border-soft: #1a2620;
+    --text: #dcece3;
+    --muted: #6f8a7d;
+    --muted-dim: #4a5f55;
+    --amber: #ffb454;
+    --amber-dim: #8a6a3a;
+    --mint: #6fe3b0;
+    --mint-dim: #3a6b56;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    min-height: 100vh;
+    padding: 28px 16px 64px;
+  }
+
+  a { color: inherit; }
+
+  .cl-wrap { max-width: 980px; margin: 0 auto; }
+
+  .cl-window {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .cl-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cl-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cl-dot.r { background: #4a3232; }
+  .cl-dot.y { background: #4a4432; }
+  .cl-dot.g { background: #2f4a38; }
+
+  .cl-titlebar-label {
+    margin-left: 4px;
+    font-size: 12.5px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .cl-hero { padding: 26px 24px 22px; }
+
+  .cl-prompt-line { font-size: 13px; color: var(--mint); margin-bottom: 14px; }
+  .cl-prompt-line .sym { color: var(--muted-dim); margin-right: 8px; }
+  .cl-caret {
+    display: inline-block;
+    width: 8px; height: 15px;
+    background: var(--mint);
+    margin-left: 4px;
+    animation: cl-blink 1s steps(1) infinite;
+    vertical-align: -2px;
+  }
+  @keyframes cl-blink { 50% { opacity: 0; } }
+
+  .cl-headline {
+    font-size: clamp(26px, 4vw, 40px);
+    line-height: 1.15;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .cl-headline .accent { color: var(--amber); }
+
+  .cl-sub { color: var(--muted); font-size: 14px; max-width: 60ch; line-height: 1.6; margin: 0; }
+
+  .cl-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); }
+  .cl-stat { padding: 16px 20px; border-right: 1px solid var(--border); }
+  .cl-stat:last-child { border-right: none; }
+  .cl-stat-num { font-size: 22px; font-weight: 700; color: var(--mint); }
+  .cl-stat-label { font-size: 11.5px; color: var(--muted-dim); margin-top: 2px; }
+
+  .cl-about-window { margin-top: 14px; }
+  .cl-about-body { padding: 20px 22px; display: flex; gap: 20px; align-items: flex-start; }
+  .cl-avatar-fallback {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--panel-2);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--mint);
+  }
+  .cl-about-text { flex: 1; min-width: 0; }
+  .cl-about-name { font-size: 16px; font-weight: 700; margin: 0 0 2px; }
+  .cl-about-role { font-size: 12.5px; color: var(--amber); margin: 0 0 10px; }
+  .cl-about-bio { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: 64ch; white-space: pre-wrap; }
+
+  .cl-about-contact { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted-dim); margin: 0 0 12px; }
+  .cl-about-contact a { color: var(--muted-dim); text-decoration: none; }
+  .cl-about-contact a:hover { color: var(--mint); }
+
+  .cl-chip-group { margin-top: 14px; }
+  .cl-chip-group-label { font-size: 11px; color: var(--muted-dim); margin-bottom: 6px; }
+  .cl-chip-group-label .sym { color: var(--muted-dim); margin-right: 5px; }
+  .cl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cl-chip {
+    font-size: 11.5px; padding: 4px 10px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
+  }
+  .cl-chip.cert { color: var(--amber); border-color: var(--amber-dim); }
+
+  @media (max-width: 520px) { .cl-about-body { flex-direction: column; } }
+
+  .cl-toolbar { margin: 22px 0 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .cl-search {
+    flex: 1; min-width: 180px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 5px; padding: 9px 12px;
+    color: var(--text); font-family: inherit; font-size: 13px;
+  }
+  .cl-search:focus { outline: none; border-color: var(--mint-dim); }
+  .cl-search::placeholder { color: var(--muted-dim); }
+
+  .cl-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cl-tag-btn {
+    font-family: inherit; font-size: 12px; padding: 7px 11px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--panel); color: var(--muted); cursor: pointer;
+  }
+  .cl-tag-btn.active { border-color: var(--mint-dim); color: var(--mint); background: rgba(111,227,176,0.06); }
+
+  .cl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+
+  .cl-card { background: var(--panel); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; display: flex; flex-direction: column; }
+
+  .cl-card-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--panel-2); border-bottom: 1px solid var(--border); }
+  .cl-card-bar-dots { display: flex; gap: 5px; }
+  .cl-card-bar-dots .cl-dot { width: 7px; height: 7px; }
+  .cl-provider { font-size: 10.5px; color: var(--muted-dim); letter-spacing: 0.04em; }
+
+  .cl-card-body { padding: 14px 14px 6px; flex: 1; }
+  .cl-card-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
+  .cl-card-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin: 0 0 10px; }
+
+  .cl-card-images { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 12px; }
+  .cl-card-images img {
+    height: 110px; width: auto; flex-shrink: 0; border-radius: 5px;
+    border: 1px solid var(--border-soft); object-fit: cover; cursor: zoom-in;
+  }
+
+  .cl-lightbox {
+    position: fixed; inset: 0; background: rgba(4,7,6,0.9);
+    display: flex; align-items: center; justify-content: center;
+    padding: 30px; z-index: 60; cursor: zoom-out;
+  }
+  .cl-lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; border: 1px solid var(--border); }
+  .cl-lightbox[hidden] { display: none; }
+
+  .cl-card-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--border-soft); }
+  .cl-savings { font-size: 13px; font-weight: 700; color: var(--mint); }
+  .cl-savings .lbl { color: var(--muted-dim); font-weight: 400; font-size: 11px; margin-right: 4px; }
+
+  .cl-empty { text-align: center; padding: 50px 20px; color: var(--muted-dim); font-size: 13px; }
+
+  @media (max-width: 520px) {
+    .cl-stats { grid-template-columns: 1fr; }
+    .cl-stat { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+  <div class="cl-wrap">
+
+    <div class="cl-window">
+      <div class="cl-titlebar">
+        <span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span>
+        <span class="cl-titlebar-label">cost-lab — zsh — 100x30</span>
+      </div>
+      <div class="cl-hero">
+        <div class="cl-prompt-line"><span class="sym">$</span>whoami<span class="cl-caret"></span></div>
+        <h1 class="cl-headline">a running log of<br /><span class="accent">cost optimizations</span> that actually shipped</h1>
+        <p class="cl-sub">Every entry here is a real fix and what it saved. Filter by platform or search below.</p>
+      </div>
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-num" id="stat-total">3</div>
+          <div class="cl-stat-label">use cases logged</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-num" id="stat-platforms">3</div>
+          <div class="cl-stat-label">platforms covered</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-num" id="stat-visible">3</div>
+          <div class="cl-stat-label">matching current filter</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cl-window cl-about-window">
+      <div class="cl-titlebar">
+        <span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span>
+        <span class="cl-titlebar-label">cat about.md</span>
+      </div>
+      <div class="cl-about-body">
+        <div class="cl-avatar-fallback">$_</div>
+        <div class="cl-about-text">
+          <p class="cl-about-name">Raghwendra Mishra</p>
+          <p class="cl-about-role">Assistant Manager, Cloud FinOps</p>
+          <div class="cl-about-contact">
+            <a href="mailto:mishra.ragh09@gmail.com">mishra.ragh09@gmail.com</a>
+            <span>+91 9960271302</span>
+            <span>Pune, India</span>
+          </div>
+          <p class="cl-about-bio">Cloud FinOps professional with 12+ years in IT, the last several focused on optimizing cloud spend across AWS and Azure. I build cost visibility dashboards, run rightsizing and reserved-instance strategies, and turn savings work into reporting leadership actually uses. This log is where I track each optimization and what it saved.</p>
+          <div class="cl-chip-group">
+            <div class="cl-chip-group-label"><span class="sym">$</span>skills</div>
+            <div class="cl-chips">
+              <span class="cl-chip">Azure Cost Management</span>
+              <span class="cl-chip">AWS Billing Management</span>
+              <span class="cl-chip">AWS S3 & Athena</span>
+              <span class="cl-chip">AWS RDS</span>
+              <span class="cl-chip">AWS DMS & Redshift</span>
+              <span class="cl-chip">CloudWatch</span>
+              <span class="cl-chip">Cloudability</span>
+              <span class="cl-chip">Datadog</span>
+              <span class="cl-chip">Reserved Instances & Savings Plans</span>
+            </div>
+          </div>
+          <div class="cl-chip-group">
+            <div class="cl-chip-group-label"><span class="sym">$</span>certifications</div>
+            <div class="cl-chips">
+              <span class="cl-chip cert">AWS Certified Solutions Architect – Associate</span>
+              <span class="cl-chip cert">Microsoft Certified: Azure Database Administrator Associate</span>
+              <span class="cl-chip cert">FinOps Certified Practitioner</span>
+              <span class="cl-chip cert">Microsoft Certified Professional</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cl-toolbar">
+      <input class="cl-search" id="cl-search" type="text" placeholder="search by title or description..." />
+      <div class="cl-tags" id="cl-tags">
+        <button class="cl-tag-btn active" data-tag="all">all (3)</button>
+        <button class="cl-tag-btn" data-tag="aws">aws (1)</button>
+        <button class="cl-tag-btn" data-tag="gcp">gcp (1)</button>
+        <button class="cl-tag-btn" data-tag="k8s">k8s (1)</button>
+      </div>
+    </div>
+
+    <div class="cl-grid" id="cl-grid">
+
+      <div class="cl-card" data-provider="aws" data-title="right-size idle ec2 instances" data-desc="found 38 ec2 instances running below 5% cpu for 14+ days straight. downsized to burstable t-class and scheduled dev instances to stop nightly.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · 2026-06-02</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Right-size idle EC2 instances</h3>
+          <p class="cl-card-desc">Found 38 EC2 instances running below 5% CPU for 14+ days straight. Downsized to burstable t-class and scheduled dev instances to stop nightly.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">saved</span>$4,200/mo</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="gcp" data-title="move cold storage to nearline" data-desc="objects untouched for 90+ days were sitting in standard storage. lifecycle rule moved them to nearline automatically.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">gcp · 2026-05-18</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Move cold storage to Nearline</h3>
+          <p class="cl-card-desc">Objects untouched for 90+ days were sitting in Standard storage. Lifecycle rule moved them to Nearline automatically.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">saved</span>$1,150/mo</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="k8s" data-title="kill orphaned pvcs after deploy churn" data-desc="ci pipeline left detached persistentvolumeclaims after failed rollouts. a weekly cron now reaps anything unbound for 48h.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">k8s · 2026-04-27</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Kill orphaned PVCs after deploy churn</h3>
+          <p class="cl-card-desc">CI pipeline left detached PersistentVolumeClaims after failed rollouts. A weekly cron now reaps anything unbound for 48h.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">saved</span>$310/mo</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="cl-empty" id="cl-empty" hidden>nothing matches that filter.</div>
+
+  </div>
+
+  <div class="cl-lightbox" id="cl-lightbox" hidden><img id="cl-lightbox-img" src="" /></div>
+
+<script>
+(function () {
+  var grid = document.getElementById('cl-grid');
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.cl-card'));
+  var search = document.getElementById('cl-search');
+  var tagButtons = document.querySelectorAll('.cl-tag-btn');
+  var empty = document.getElementById('cl-empty');
+  var statVisible = document.getElementById('stat-visible');
+  var activeTag = 'all';
+
+  function applyFilter() {
+    var q = search.value.trim().toLowerCase();
+    var visibleCount = 0;
+    cards.forEach(function (card) {
+      var matchesTag = activeTag === 'all' || card.dataset.provider === activeTag;
+      var matchesQuery = !q || card.dataset.title.indexOf(q) !== -1 || card.dataset.desc.indexOf(q) !== -1;
+      var show = matchesTag && matchesQuery;
+      card.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    statVisible.textContent = visibleCount;
+    empty.hidden = visibleCount !== 0;
+  }
+
+  search.addEventListener('input', applyFilter);
+
+  tagButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      tagButtons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeTag = btn.dataset.tag;
+      applyFilter();
+    });
+  });
+
+  // lightbox for card screenshots, if any are added later
+  var lightbox = document.getElementById('cl-lightbox');
+  var lightboxImg = document.getElementById('cl-lightbox-img');
+  document.querySelectorAll('[data-view-img]').forEach(function (img) {
+    img.addEventListener('click', function () {
+      lightboxImg.src = img.getAttribute('src');
+      lightbox.hidden = false;
+    });
+  });
+  lightbox.addEventListener('click', function () { lightbox.hidden = true; });
+})();
+</script>
+</body>
+</html>
