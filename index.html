@@ -101,6 +101,15 @@
 
   .cl-about-window { margin-top: 14px; }
   .cl-about-body { padding: 20px 22px; display: flex; gap: 20px; align-items: flex-start; }
+  .cl-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--panel-2);
+  }
   .cl-avatar-fallback {
     width: 72px; height: 72px; border-radius: 50%;
     border: 1px solid var(--border); background: var(--panel-2);
@@ -110,7 +119,7 @@
   .cl-about-text { flex: 1; min-width: 0; }
   .cl-about-name { font-size: 16px; font-weight: 700; margin: 0 0 2px; }
   .cl-about-role { font-size: 12.5px; color: var(--amber); margin: 0 0 10px; }
-  .cl-about-bio { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: 64ch; white-space: pre-wrap; }
+  .cl-about-bio { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: none; white-space: pre-wrap; }
 
   .cl-about-contact { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted-dim); margin: 0 0 12px; }
   .cl-about-contact a { color: var(--muted-dim); text-decoration: none; }
@@ -182,65 +191,81 @@
     .cl-stats { grid-template-columns: 1fr; }
     .cl-stat { border-right: none; border-bottom: 1px solid var(--border); }
   }
+
+  .cl-chart-window { margin-top: 14px; }
+  .cl-chart-body { padding: 16px 20px 18px; display: flex; flex-direction: column; gap: 8px; }
+  .cl-bar-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 90px;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    border-radius: 4px;
+  }
+  .cl-bar-row:hover { background: rgba(111,227,176,0.06); }
+  .cl-bar-row.active { background: rgba(111,227,176,0.1); }
+  .cl-bar-label { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cl-bar-track { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+  .cl-bar-fill { display: block; height: 100%; background: var(--mint-dim); }
+  .cl-bar-row:hover .cl-bar-fill, .cl-bar-row.active .cl-bar-fill { background: var(--mint); }
+  .cl-bar-value { font-size: 11.5px; color: var(--mint); text-align: right; }
+
+  .cl-select {
+    font-family: inherit; font-size: 12px; padding: 7px 10px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--panel); color: var(--muted); cursor: pointer;
+  }
+  .cl-select:focus { outline: none; border-color: var(--mint-dim); }
+
+  .cl-year-divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 0 -2px;
+    color: var(--muted-dim);
+  }
+  .cl-year-divider span:not(.cl-year-label) { flex: 1; height: 1px; background: var(--border); }
+  .cl-year-label { font-size: 12px; letter-spacing: 0.08em; }
+  .cl-year-divider[hidden] { display: none; }
 </style>
 </head>
 <body>
   <div class="cl-wrap">
 
-    <div class="cl-window">
-      <div class="cl-titlebar">
-        <span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span>
-        <span class="cl-titlebar-label">cost-lab — zsh — 100x30</span>
-      </div>
-      <div class="cl-hero">
-        <div class="cl-prompt-line"><span class="sym">$</span>whoami<span class="cl-caret"></span></div>
-        <h1 class="cl-headline">a running log of<br /><span class="accent">cost optimizations</span> that actually shipped</h1>
-        <p class="cl-sub">Every entry here is a real fix and what it saved. Filter by platform or search below.</p>
-      </div>
-      <div class="cl-stats">
-        <div class="cl-stat">
-          <div class="cl-stat-num" id="stat-total">3</div>
-          <div class="cl-stat-label">use cases logged</div>
-        </div>
-        <div class="cl-stat">
-          <div class="cl-stat-num" id="stat-platforms">3</div>
-          <div class="cl-stat-label">platforms covered</div>
-        </div>
-        <div class="cl-stat">
-          <div class="cl-stat-num" id="stat-visible">3</div>
-          <div class="cl-stat-label">matching current filter</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="cl-window cl-about-window">
+    <div class="cl-window cl-about-window" style="margin-top: 0;">
       <div class="cl-titlebar">
         <span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span>
         <span class="cl-titlebar-label">cat about.md</span>
       </div>
       <div class="cl-about-body">
-        <div class="cl-avatar-fallback">$_</div>
+        <img class="cl-avatar" src="data:image/jpeg;base64,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" alt="Raghwendra Mishra" />
         <div class="cl-about-text">
           <p class="cl-about-name">Raghwendra Mishra</p>
-          <p class="cl-about-role">Assistant Manager, Cloud FinOps</p>
           <div class="cl-about-contact">
             <a href="mailto:mishra.ragh09@gmail.com">mishra.ragh09@gmail.com</a>
             <span>+91 9960271302</span>
             <span>Pune, India</span>
           </div>
-          <p class="cl-about-bio">Cloud FinOps professional with 12+ years in IT, the last several focused on optimizing cloud spend across AWS and Azure. I build cost visibility dashboards, run rightsizing and reserved-instance strategies, and turn savings work into reporting leadership actually uses. This log is where I track each optimization and what it saved.</p>
+          <p class="cl-about-bio">FinOps practitioner operating across all three phases of the FinOps Framework — Inform, Optimize, Operate — to turn multi-cloud spend (AWS, Azure, Kubernetes) into unit economics leadership can act on. I build tagging governance that make cost ownership traceable to teams and services, run anomaly detection to catch spend drift before it hits the invoice, and manage RI/Savings Plan and Committed Use portfolios to keep commitment coverage high without over-committing. On the engineering side, that means rightsizing at scale, storage lifecycle tiering, and workload-level cost attribution in shared Kubernetes clusters. The throughline across all of it: partnering with engineering, finance, so cost data drives decisions, not just dashboards. This log tracks each optimization and what it saved.</p>
           <div class="cl-chip-group">
             <div class="cl-chip-group-label"><span class="sym">$</span>skills</div>
             <div class="cl-chips">
               <span class="cl-chip">Azure Cost Management</span>
               <span class="cl-chip">AWS Billing Management</span>
-              <span class="cl-chip">AWS S3 & Athena</span>
-              <span class="cl-chip">AWS RDS</span>
-              <span class="cl-chip">AWS DMS & Redshift</span>
-              <span class="cl-chip">CloudWatch</span>
               <span class="cl-chip">Cloudability</span>
               <span class="cl-chip">Datadog</span>
-              <span class="cl-chip">Reserved Instances & Savings Plans</span>
+              <span class="cl-chip">Vantage</span>
+              <span class="cl-chip">Cost Optimization</span>
+              <span class="cl-chip">Rate Optimization</span>
+              <span class="cl-chip">PowerBI</span>
+              <span class="cl-chip">Python</span>
+              <span class="cl-chip">SQL Scripting</span>
+              <span class="cl-chip">Automation</span>
             </div>
           </div>
           <div class="cl-chip-group">
@@ -256,57 +281,680 @@
       </div>
     </div>
 
+
+    <div class="cl-window cl-chart-window">
+      <div class="cl-titlebar">
+        <span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span>
+        <span class="cl-titlebar-label">top services --sort=savings</span>
+      </div>
+      <div class="cl-chart-body" id="cl-chart">
+        <button class="cl-bar-row" data-service="ebs">
+          <span class="cl-bar-label">EBS</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:100%"></span></span>
+          <span class="cl-bar-value">$2,348,040</span>
+        </button>
+        <button class="cl-bar-row" data-service="premium-files">
+          <span class="cl-bar-label">Premium Files</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:50%"></span></span>
+          <span class="cl-bar-value">$1,170,000</span>
+        </button>
+        <button class="cl-bar-row" data-service="rds">
+          <span class="cl-bar-label">RDS</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:49%"></span></span>
+          <span class="cl-bar-value">$1,142,400</span>
+        </button>
+        <button class="cl-bar-row" data-service="efs">
+          <span class="cl-bar-label">EFS</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:39%"></span></span>
+          <span class="cl-bar-value">$924,000</span>
+        </button>
+        <button class="cl-bar-row" data-service="backup">
+          <span class="cl-bar-label">Backup</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:39%"></span></span>
+          <span class="cl-bar-value">$910,200</span>
+        </button>
+        <button class="cl-bar-row" data-service="ec2">
+          <span class="cl-bar-label">EC2</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:35%"></span></span>
+          <span class="cl-bar-value">$831,000</span>
+        </button>
+        <button class="cl-bar-row" data-service="ebs-snapshots">
+          <span class="cl-bar-label">EBS Snapshots</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:30%"></span></span>
+          <span class="cl-bar-value">$699,000</span>
+        </button>
+        <button class="cl-bar-row" data-service="aws-backup">
+          <span class="cl-bar-label">AWS Backup</span>
+          <span class="cl-bar-track"><span class="cl-bar-fill" style="width:27%"></span></span>
+          <span class="cl-bar-value">$636,000</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="cl-window" style="margin-top: 14px;">
+      <div class="cl-titlebar">
+        <span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span>
+        <span class="cl-titlebar-label">cost-lab — zsh — 100x30</span>
+      </div>
+      <div class="cl-hero">
+        <div class="cl-prompt-line"><span class="sym">$</span>whoami<span class="cl-caret"></span></div>
+        <h1 class="cl-headline">a running log of<br /><span class="accent">cost optimizations</span> that actually shipped</h1>
+        <p class="cl-sub">Every entry here is a real initiative and what it saved. Filter by platform, year, or service, or search below.</p>
+      </div>
+      <div class="cl-stats">
+        <div class="cl-stat">
+          <div class="cl-stat-num" id="stat-total">39</div>
+          <div class="cl-stat-label">use cases logged</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-num" id="stat-platforms">$13,757,160</div>
+          <div class="cl-stat-label">total saved (FY24–26)</div>
+        </div>
+        <div class="cl-stat">
+          <div class="cl-stat-num" id="stat-visible">39</div>
+          <div class="cl-stat-label">matching current filter</div>
+        </div>
+      </div>
+    </div>
+
     <div class="cl-toolbar">
       <input class="cl-search" id="cl-search" type="text" placeholder="search by title or description..." />
+      <select class="cl-select" id="cl-service-select">
+        <option value="all">all services</option>
+          <option value="ahub">AHUB (1)</option>
+          <option value="ami">AMI (1)</option>
+          <option value="aws-backup">AWS Backup (1)</option>
+          <option value="application-gateway">Application Gateway (1)</option>
+          <option value="backup">Backup (1)</option>
+          <option value="defender-for-cloud">Defender for Cloud (1)</option>
+          <option value="defender-for-containers">Defender for Containers (1)</option>
+          <option value="defender-for-servers">Defender for Servers (1)</option>
+          <option value="disk">Disk (1)</option>
+          <option value="ebs">EBS (3)</option>
+          <option value="ebs-snapshots">EBS Snapshots (1)</option>
+          <option value="ec2">EC2 (3)</option>
+          <option value="efs">EFS (1)</option>
+          <option value="eip">EIP (1)</option>
+          <option value="eks">EKS (1)</option>
+          <option value="elb">ELB (1)</option>
+          <option value="environments">Environments (1)</option>
+          <option value="network---public-ip">Network - Public IP (1)</option>
+          <option value="network-peering">Network Peering (1)</option>
+          <option value="postgres-database">Postgres Database (2)</option>
+          <option value="premium-files">Premium Files (1)</option>
+          <option value="rds">RDS (4)</option>
+          <option value="rds-snapshots">RDS Snapshots (2)</option>
+          <option value="s3">S3 (1)</option>
+          <option value="snapshots">Snapshots (2)</option>
+          <option value="storage">Storage (1)</option>
+          <option value="vm">VM (2)</option>
+          <option value="virtual-network">Virtual Network (1)</option>
+      </select>
+    </div>
+    <div class="cl-toolbar">
+      <span class="cl-chip-group-label" style="margin:0 2px 0 0;"><span class="sym">$</span>platform</span>
       <div class="cl-tags" id="cl-tags">
-        <button class="cl-tag-btn active" data-tag="all">all (3)</button>
-        <button class="cl-tag-btn" data-tag="aws">aws (1)</button>
-        <button class="cl-tag-btn" data-tag="gcp">gcp (1)</button>
+        <button class="cl-tag-btn active" data-tag="all">all (39)</button>
+        <button class="cl-tag-btn" data-tag="aws">aws (20)</button>
+        <button class="cl-tag-btn" data-tag="azure">azure (18)</button>
         <button class="cl-tag-btn" data-tag="k8s">k8s (1)</button>
+      </div>
+    </div>
+    <div class="cl-toolbar">
+      <span class="cl-chip-group-label" style="margin:0 2px 0 0;"><span class="sym">$</span>fiscal year</span>
+      <div class="cl-tags" id="cl-years">
+        <button class="cl-tag-btn active" data-year="all">all (39)</button>
+        <button class="cl-tag-btn" data-year="2024">FY2024 (19)</button>
+        <button class="cl-tag-btn" data-year="2025">FY2025 (14)</button>
+        <button class="cl-tag-btn" data-year="2026">FY2026 (17)</button>
       </div>
     </div>
 
     <div class="cl-grid" id="cl-grid">
 
-      <div class="cl-card" data-provider="aws" data-title="right-size idle ec2 instances" data-desc="found 38 ec2 instances running below 5% cpu for 14+ days straight. downsized to burstable t-class and scheduled dev instances to stop nightly.">
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ebs" data-title="terminate ebs" data-desc="deleted unused ebs volumes; multiple teams were affected by shared portal allocation.">
         <div class="cl-card-bar">
           <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · 2026-06-02</span>
+          <span class="cl-provider">aws · FY2024</span>
         </div>
         <div class="cl-card-body">
-          <h3 class="cl-card-title">Right-size idle EC2 instances</h3>
-          <p class="cl-card-desc">Found 38 EC2 instances running below 5% CPU for 14+ days straight. Downsized to burstable t-class and scheduled dev instances to stop nightly.</p>
+          <h3 class="cl-card-title">Terminate EBS</h3>
+          <p class="cl-card-desc">Deleted unused EBS volumes; multiple teams were affected by shared portal allocation.</p>
         </div>
         <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">saved</span>$4,200/mo</div>
+          <div class="cl-savings"><span class="lbl">total saved</span>$1,200,000</div>
         </div>
       </div>
 
-      <div class="cl-card" data-provider="gcp" data-title="move cold storage to nearline" data-desc="objects untouched for 90+ days were sitting in standard storage. lifecycle rule moved them to nearline automatically.">
+      <div class="cl-card" data-provider="azure" data-years="2026" data-service="premium-files" data-title="terminate premium files" data-desc="fixed a cleanup script bug that was skipping premium files, then cleaned up the backlog.">
         <div class="cl-card-bar">
           <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">gcp · 2026-05-18</span>
+          <span class="cl-provider">azure · FY2026</span>
         </div>
         <div class="cl-card-body">
-          <h3 class="cl-card-title">Move cold storage to Nearline</h3>
-          <p class="cl-card-desc">Objects untouched for 90+ days were sitting in Standard storage. Lifecycle rule moved them to Nearline automatically.</p>
+          <h3 class="cl-card-title">Terminate Premium Files</h3>
+          <p class="cl-card-desc">Fixed a cleanup script bug that was skipping premium files, then cleaned up the backlog.</p>
         </div>
         <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">saved</span>$1,150/mo</div>
+          <div class="cl-savings"><span class="lbl">total saved</span>$1,170,000</div>
         </div>
       </div>
 
-      <div class="cl-card" data-provider="k8s" data-title="kill orphaned pvcs after deploy churn" data-desc="ci pipeline left detached persistentvolumeclaims after failed rollouts. a weekly cron now reaps anything unbound for 48h.">
+      <div class="cl-card" data-provider="aws" data-years="2024,2025,2026" data-service="ebs" data-title="terminate ebs" data-desc="manually deleted ebs volumes that decommission automation had missed, then fixed the automation.">
         <div class="cl-card-bar">
           <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">k8s · 2026-04-27</span>
+          <span class="cl-provider">aws · FY2024–2026</span>
         </div>
         <div class="cl-card-body">
-          <h3 class="cl-card-title">Kill orphaned PVCs after deploy churn</h3>
-          <p class="cl-card-desc">CI pipeline left detached PersistentVolumeClaims after failed rollouts. A weekly cron now reaps anything unbound for 48h.</p>
+          <h3 class="cl-card-title">Terminate EBS</h3>
+          <p class="cl-card-desc">Manually deleted EBS volumes that decommission automation had missed, then fixed the automation.</p>
         </div>
         <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">saved</span>$310/mo</div>
+          <div class="cl-savings"><span class="lbl">total saved</span>$1,100,040</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024,2026" data-service="efs" data-title="terminate efs" data-desc="terminated unattached/orphaned efs file systems.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024, FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate EFS</h3>
+          <p class="cl-card-desc">Terminated unattached/orphaned EFS file systems.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$924,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2024,2025" data-service="backup" data-title="terminate backup" data-desc="tracked down and deleted old compute backups; put a retention policy in place.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2024–2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Backup</h3>
+          <p class="cl-card-desc">Tracked down and deleted old compute backups; put a retention policy in place.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$910,200</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024,2025,2026" data-service="rds" data-title="terminate rds" data-desc="decommissioned idle rds instances.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024–2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate RDS</h3>
+          <p class="cl-card-desc">Decommissioned idle RDS instances.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$863,400</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ebs-snapshots" data-title="terminate ebs snapshots" data-desc="deleted old, orphaned snapshots and implemented a retention policy.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate EBS Snapshots</h3>
+          <p class="cl-card-desc">Deleted old, orphaned snapshots and implemented a retention policy.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$699,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024,2026" data-service="aws-backup" data-title="terminate aws backup" data-desc="terminated backups of unattached efs file systems and reviewed/deleted backups with &quot;always&quot; recovery points.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024, FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate AWS Backup</h3>
+          <p class="cl-card-desc">Terminated backups of unattached EFS file systems and reviewed/deleted backups with &quot;always&quot; recovery points.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$636,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2025" data-service="defender-for-containers" data-title="terminate defender for containers" data-desc="replaced microsoft defender for cloud coverage with wiz.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Defender for Containers</h3>
+          <p class="cl-card-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$578,520</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2026" data-service="snapshots" data-title="terminate snapshots" data-desc="cleaned up orphaned snapshots older than 90 days and unused amis.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Snapshots</h3>
+          <p class="cl-card-desc">Cleaned up orphaned snapshots older than 90 days and unused AMIs.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$531,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2024" data-service="postgres-database" data-title="rightsize postgres database" data-desc="rightsized postgres databases to match actual utilization.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Rightsize Postgres Database</h3>
+          <p class="cl-card-desc">Rightsized Postgres databases to match actual utilization.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$480,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2024,2026" data-service="storage" data-title="terminate storage" data-desc="cleaned up premium file storage and fixed a file-lock issue.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2024, FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Storage</h3>
+          <p class="cl-card-desc">Cleaned up premium file storage and fixed a file-lock issue.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$450,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2024,2025,2026" data-service="disk" data-title="terminate disk" data-desc="cleaned up orphaned disks.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2024–2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Disk</h3>
+          <p class="cl-card-desc">Cleaned up orphaned disks.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$412,200</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ec2" data-title="add instance scheduler to ec2" data-desc="implemented 24x7 environment shutdown for idle resources.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Add instance scheduler to EC2</h3>
+          <p class="cl-card-desc">Implemented 24x7 environment shutdown for idle resources.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$408,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2025" data-service="ec2" data-title="terminate ec2" data-desc="implemented 24x5 and 24x7 keep-alive scheduling.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate EC2</h3>
+          <p class="cl-card-desc">Implemented 24x5 and 24x7 keep-alive scheduling.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$372,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2026" data-service="rds-snapshots" data-title="terminate rds snapshots" data-desc="reduced rds backup retention to 0 after migrating backup policy to aws backup.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate RDS Snapshots</h3>
+          <p class="cl-card-desc">Reduced RDS backup retention to 0 after migrating backup policy to AWS Backup.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$354,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2025" data-service="defender-for-cloud" data-title="terminate defender for cloud" data-desc="replaced microsoft defender for cloud coverage with wiz.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Defender for Cloud</h3>
+          <p class="cl-card-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$348,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2026" data-service="s3" data-title="terminate s3" data-desc="terminated old backup buckets, standardized s3 lifecycle policy across all buckets, and cleaned up customer storage under the new policy.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate S3</h3>
+          <p class="cl-card-desc">Terminated old backup buckets, standardized S3 lifecycle policy across all buckets, and cleaned up customer storage under the new policy.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$333,600</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="environments" data-title="terminate environments" data-desc="removed non-compliant customer environments.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Environments</h3>
+          <p class="cl-card-desc">Removed non-compliant customer environments.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$252,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2026" data-service="rds-snapshots" data-title="terminate rds snapshots" data-desc="implemented automation for orphaned rds snapshot cleanup.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate RDS Snapshots</h3>
+          <p class="cl-card-desc">Implemented automation for orphaned RDS snapshot cleanup.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$216,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2025" data-service="defender-for-servers" data-title="terminate defender for servers" data-desc="replaced microsoft defender for cloud coverage with wiz.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Defender for Servers</h3>
+          <p class="cl-card-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$208,800</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="rds" data-title="rightsize rds" data-desc="rightsized rds databases to reduce over-provisioned capacity.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Rightsize RDS</h3>
+          <p class="cl-card-desc">Rightsized RDS databases to reduce over-provisioned capacity.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$204,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2026" data-service="virtual-network" data-title="modernize virtual network" data-desc="optimized database peering configuration that was incurring extra cross-vnet cost.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Modernize Virtual Network</h3>
+          <p class="cl-card-desc">Optimized database peering configuration that was incurring extra cross-VNET cost.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$180,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2026" data-service="postgres-database" data-title="terminate postgres database" data-desc="terminated orphaned msai instances and cleaned up unused resource groups (pingfederate, ingress, navigate) and a postgres database.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Postgres Database</h3>
+          <p class="cl-card-desc">Terminated orphaned MSAI instances and cleaned up unused resource groups (PingFederate, Ingress, Navigate) and a Postgres database.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$150,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2025" data-service="ami" data-title="terminate ami" data-desc="traced and terminated orphaned/old amis that weren't attached to any running ec2 instance.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate AMI</h3>
+          <p class="cl-card-desc">Traced and terminated orphaned/old AMIs that weren't attached to any running EC2 instance.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$122,400</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2024" data-service="ahub" data-title="enable linux byol (azure hybrid benefit)" data-desc="implemented linux byol (azure hybrid benefit) for the vm auto-assessment process.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Enable Linux BYOL (Azure Hybrid Benefit)</h3>
+          <p class="cl-card-desc">Implemented Linux BYOL (Azure Hybrid Benefit) for the VM auto-assessment process.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$96,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="k8s" data-years="2024" data-service="eks" data-title="rightsize eks" data-desc="rightsized eks node groups to match actual workload demand.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">k8s · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Rightsize EKS</h3>
+          <p class="cl-card-desc">Rightsized EKS node groups to match actual workload demand.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$78,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="eip" data-title="terminate eip" data-desc="terminated unattached elastic ips.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate EIP</h3>
+          <p class="cl-card-desc">Terminated unattached Elastic IPs.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$61,800</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2025" data-service="vm" data-title="auto-shutdown vm" data-desc="implemented weekend auto-shutdown for non-production vms.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Auto-shutdown VM</h3>
+          <p class="cl-card-desc">Implemented weekend auto-shutdown for non-production VMs.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$57,600</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2025" data-service="vm" data-title="auto-shutdown vm" data-desc="implemented daily auto-shutdown for non-production vms.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Auto-shutdown VM</h3>
+          <p class="cl-card-desc">Implemented daily auto-shutdown for non-production VMs.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$52,800</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ec2" data-title="terminate ec2" data-desc="terminated idle, unused ec2 instances.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate EC2</h3>
+          <p class="cl-card-desc">Terminated idle, unused EC2 instances.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$51,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2026" data-service="ebs" data-title="terminate ebs" data-desc="manually deleted ebs volumes that decommission automation had missed, then fixed the automation.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate EBS</h3>
+          <p class="cl-card-desc">Manually deleted EBS volumes that decommission automation had missed, then fixed the automation.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$48,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2026" data-service="snapshots" data-title="terminate snapshots" data-desc="cleaned up orphaned snapshots older than 90 days and unused amis.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Snapshots</h3>
+          <p class="cl-card-desc">Cleaned up orphaned snapshots older than 90 days and unused AMIs.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$42,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2026" data-service="application-gateway" data-title="terminate application gateway" data-desc="deleted orphaned application gateways from non-production environments.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Application Gateway</h3>
+          <p class="cl-card-desc">Deleted orphaned application gateways from non-production environments.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$39,600</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2025,2026" data-service="rds" data-title="modernize rds" data-desc="upgraded rds to a newer version to avoid extended support costs.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2025–2026</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Modernize RDS</h3>
+          <p class="cl-card-desc">Upgraded RDS to a newer version to avoid extended support costs.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$39,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2025" data-service="rds" data-title="terminate rds" data-desc="terminated rds instances flagged for decommission via internal change tickets.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate RDS</h3>
+          <p class="cl-card-desc">Terminated RDS instances flagged for decommission via internal change tickets.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$36,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2024" data-service="network---public-ip" data-title="terminate network - public ip" data-desc="terminated an unattached public ip.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Network - Public IP</h3>
+          <p class="cl-card-desc">Terminated an unattached public IP.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$25,200</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="azure" data-years="2025" data-service="network-peering" data-title="terminate network peering" data-desc="fixed a cross-region network peering misconfiguration.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">azure · FY2025</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate Network Peering</h3>
+          <p class="cl-card-desc">Fixed a cross-region network peering misconfiguration.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$18,000</div>
+        </div>
+      </div>
+
+      <div class="cl-card" data-provider="aws" data-years="2024" data-service="elb" data-title="terminate elb" data-desc="deleted an inactive load balancer.">
+        <div class="cl-card-bar">
+          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+          <span class="cl-provider">aws · FY2024</span>
+        </div>
+        <div class="cl-card-body">
+          <h3 class="cl-card-title">Terminate ELB</h3>
+          <p class="cl-card-desc">Deleted an inactive load balancer.</p>
+        </div>
+        <div class="cl-card-foot">
+          <div class="cl-savings"><span class="lbl">total saved</span>$9,000</div>
         </div>
       </div>
 
@@ -323,26 +971,39 @@
   var grid = document.getElementById('cl-grid');
   var cards = Array.prototype.slice.call(grid.querySelectorAll('.cl-card'));
   var search = document.getElementById('cl-search');
-  var tagButtons = document.querySelectorAll('.cl-tag-btn');
+  var tagButtons = document.querySelectorAll('#cl-tags .cl-tag-btn');
+  var yearButtons = document.querySelectorAll('#cl-years .cl-tag-btn');
+  var serviceSelect = document.getElementById('cl-service-select');
+  var barRows = document.querySelectorAll('.cl-bar-row');
   var empty = document.getElementById('cl-empty');
   var statVisible = document.getElementById('stat-visible');
   var activeTag = 'all';
+  var activeYear = 'all';
 
   function applyFilter() {
     var q = search.value.trim().toLowerCase();
+    var svc = serviceSelect.value;
     var visibleCount = 0;
     cards.forEach(function (card) {
       var matchesTag = activeTag === 'all' || card.dataset.provider === activeTag;
+      var cardYears = card.dataset.years ? card.dataset.years.split(',') : [];
+      var matchesYear = activeYear === 'all' || cardYears.indexOf(activeYear) !== -1;
+      var matchesService = svc === 'all' || card.dataset.service === svc;
       var matchesQuery = !q || card.dataset.title.indexOf(q) !== -1 || card.dataset.desc.indexOf(q) !== -1;
-      var show = matchesTag && matchesQuery;
+      var show = matchesTag && matchesYear && matchesService && matchesQuery;
       card.style.display = show ? '' : 'none';
       if (show) visibleCount++;
     });
     statVisible.textContent = visibleCount;
     empty.hidden = visibleCount !== 0;
+
+    barRows.forEach(function (row) {
+      row.classList.toggle('active', row.dataset.service === svc);
+    });
   }
 
   search.addEventListener('input', applyFilter);
+  serviceSelect.addEventListener('change', applyFilter);
 
   tagButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -353,7 +1014,23 @@
     });
   });
 
-  // lightbox for card screenshots, if any are added later
+  yearButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      yearButtons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeYear = btn.dataset.year;
+      applyFilter();
+    });
+  });
+
+  barRows.forEach(function (row) {
+    row.addEventListener('click', function () {
+      var svc = row.dataset.service;
+      serviceSelect.value = (serviceSelect.value === svc) ? 'all' : svc;
+      applyFilter();
+    });
+  });
+
   var lightbox = document.getElementById('cl-lightbox');
   var lightboxImg = document.getElementById('cl-lightbox-img');
   document.querySelectorAll('[data-view-img]').forEach(function (img) {
@@ -363,6 +1040,8 @@
     });
   });
   lightbox.addEventListener('click', function () { lightbox.hidden = true; });
+
+  applyFilter();
 })();
 </script>
 </body>
