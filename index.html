@@ -194,6 +194,12 @@
 
   .cl-chart-window { margin-top: 14px; }
   .cl-chart-body { padding: 16px 20px 18px; display: flex; flex-direction: column; gap: 8px; }
+  .cl-methodology {
+    font-size: 12px; color: var(--muted); line-height: 1.6; margin: 0 0 10px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border-soft);
+  }
+  .cl-methodology b { color: var(--mint); font-weight: 600; }
+  .cl-updated { font-size: 11px; color: var(--muted-dim); margin: 10px 0 0; }
   .cl-bar-row {
     display: grid;
     grid-template-columns: 160px 1fr 90px;
@@ -250,6 +256,7 @@
             <a href="mailto:mishra.ragh09@gmail.com">mishra.ragh09@gmail.com</a>
             <span>+91 9960271302</span>
             <span>Pune, India</span>
+            <a href="resume.pdf" target="_blank" rel="noopener">resume (pdf)</a>
           </div>
           <p class="cl-about-bio">FinOps practitioner operating across all three phases of the FinOps Framework — Inform, Optimize, Operate — to turn multi-cloud spend (AWS, Azure, Kubernetes) into unit economics leadership can act on. I build tagging governance that make cost ownership traceable to teams and services, run anomaly detection to catch spend drift before it hits the invoice, and manage RI/Savings Plan and Committed Use portfolios to keep commitment coverage high without over-committing. On the engineering side, that means rightsizing at scale, storage lifecycle tiering, and workload-level cost attribution in shared Kubernetes clusters. The throughline across all of it: partnering with engineering, finance, so cost data drives decisions, not just dashboards. This log tracks each optimization and what it saved.</p>
           <div class="cl-chip-group">
@@ -288,6 +295,7 @@
         <span class="cl-titlebar-label">top services --sort=savings</span>
       </div>
       <div class="cl-chart-body" id="cl-chart">
+        <p class="cl-methodology">Every figure here follows the FinOps Framework: <b>Inform</b> (surface real usage and cost drivers via tagging and billing data), <b>Optimize</b> (rightsize, decommission, or re-rate the workload), <b>Operate</b> (automate and monitor so the fix sticks). Savings are validated against the actual billing delta in the month(s) after the change, not estimated.</p>
         <button class="cl-bar-row" data-service="ebs">
           <span class="cl-bar-label">EBS</span>
           <span class="cl-bar-track"><span class="cl-bar-fill" style="width:100%"></span></span>
@@ -340,6 +348,7 @@
         <div class="cl-prompt-line"><span class="sym">$</span>whoami<span class="cl-caret"></span></div>
         <h1 class="cl-headline">a running log of<br /><span class="accent">cost optimizations</span> that actually shipped</h1>
         <p class="cl-sub">Every entry here is a real initiative and what it saved. Filter by platform, year, or service, or search below.</p>
+        <p class="cl-updated">last updated: 2026-09-02</p>
       </div>
       <div class="cl-stats">
         <div class="cl-stat">
