@@ -154,34 +154,41 @@
   }
   .cl-tag-btn.active { border-color: var(--mint-dim); color: var(--mint); background: rgba(111,227,176,0.06); }
 
-  .cl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .cl-grid { display: flex; flex-direction: column; gap: 10px; }
 
   .cl-card { background: var(--panel); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; display: flex; flex-direction: column; }
+
+  .cl-service-card { display: block; }
+  .cl-service-summary {
+    display: block; cursor: pointer; list-style: none;
+  }
+  .cl-service-summary::-webkit-details-marker { display: none; }
+  .cl-service-summary::marker { content: ""; }
+  .cl-service-summary:hover .cl-service-title-row h3 { color: var(--mint); }
+  .cl-service-main { padding: 12px 14px 14px; }
+  .cl-service-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .cl-service-title-row h3 { transition: color .15s; }
+  .cl-chevron { color: var(--muted-dim); font-size: 12px; flex-shrink: 0; transition: transform .15s; }
+  details[open] > .cl-service-summary .cl-chevron { transform: rotate(180deg); }
+  .cl-service-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+  .cl-service-count { font-size: 11.5px; color: var(--muted-dim); }
+  .cl-service-entries { display: flex; flex-direction: column; border-top: 1px solid var(--border-soft); padding: 4px 14px 12px; }
+  .cl-entry { padding: 10px 0; border-top: 1px solid var(--border-soft); }
+  .cl-entry:first-child { border-top: none; }
+  .cl-entry-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .cl-entry-period { font-size: 10.5px; color: var(--muted-dim); letter-spacing: 0.03em; }
+  .cl-entry-amount { font-size: 12.5px; font-weight: 700; color: var(--mint); }
+  .cl-entry-title { font-size: 13px; font-weight: 600; margin: 4px 0 2px; }
+  .cl-entry-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin: 0; }
+
 
   .cl-card-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--panel-2); border-bottom: 1px solid var(--border); }
   .cl-card-bar-dots { display: flex; gap: 5px; }
   .cl-card-bar-dots .cl-dot { width: 7px; height: 7px; }
   .cl-provider { font-size: 10.5px; color: var(--muted-dim); letter-spacing: 0.04em; }
 
-  .cl-card-body { padding: 14px 14px 6px; flex: 1; }
-  .cl-card-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
-  .cl-card-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin: 0 0 10px; }
+  .cl-card-title { font-size: 15px; font-weight: 600; margin: 0; line-height: 1.35; }
 
-  .cl-card-images { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 12px; }
-  .cl-card-images img {
-    height: 110px; width: auto; flex-shrink: 0; border-radius: 5px;
-    border: 1px solid var(--border-soft); object-fit: cover; cursor: zoom-in;
-  }
-
-  .cl-lightbox {
-    position: fixed; inset: 0; background: rgba(4,7,6,0.9);
-    display: flex; align-items: center; justify-content: center;
-    padding: 30px; z-index: 60; cursor: zoom-out;
-  }
-  .cl-lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; border: 1px solid var(--border); }
-  .cl-lightbox[hidden] { display: none; }
-
-  .cl-card-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--border-soft); }
   .cl-savings { font-size: 13px; font-weight: 700; color: var(--mint); }
   .cl-savings .lbl { color: var(--muted-dim); font-weight: 400; font-size: 11px; margin-right: 4px; }
 
@@ -336,6 +343,7 @@
           <span class="cl-bar-track"><span class="cl-bar-fill" style="width:27%"></span></span>
           <span class="cl-bar-value">$636,000</span>
         </button>
+        <p class="cl-updated" style="margin-top:4px;">figures above are totals per service, summed across every logged entry for that service — click a row to filter the log below to just that service.</p>
       </div>
     </div>
 
@@ -356,7 +364,7 @@
           <div class="cl-stat-label">use cases logged</div>
         </div>
         <div class="cl-stat">
-          <div class="cl-stat-num" id="stat-platforms">$13,757,160</div>
+          <div class="cl-stat-num" id="stat-total-saved">$13,757,160</div>
           <div class="cl-stat-label">total saved (FY24–26)</div>
         </div>
         <div class="cl-stat">
@@ -367,7 +375,7 @@
     </div>
 
     <div class="cl-toolbar">
-      <input class="cl-search" id="cl-search" type="text" placeholder="search by title or description..." />
+      <input class="cl-search" id="cl-search" type="text" placeholder="search by title or description..." aria-label="search cost optimization entries by title or description" />
       <select class="cl-select" id="cl-service-select">
         <option value="all">all services</option>
           <option value="ahub">AHUB (1)</option>
@@ -403,569 +411,923 @@
     <div class="cl-toolbar">
       <span class="cl-chip-group-label" style="margin:0 2px 0 0;"><span class="sym">$</span>platform</span>
       <div class="cl-tags" id="cl-tags">
-        <button class="cl-tag-btn active" data-tag="all">all (39)</button>
-        <button class="cl-tag-btn" data-tag="aws">aws (20)</button>
-        <button class="cl-tag-btn" data-tag="azure">azure (18)</button>
-        <button class="cl-tag-btn" data-tag="k8s">k8s (1)</button>
+        <button class="cl-tag-btn active" data-tag="all" aria-pressed="true">all (39)</button>
+        <button class="cl-tag-btn" data-tag="aws" aria-pressed="false">aws (22)</button>
+        <button class="cl-tag-btn" data-tag="azure" aria-pressed="false">azure (16)</button>
+        <button class="cl-tag-btn" data-tag="k8s" aria-pressed="false">k8s (1)</button>
       </div>
     </div>
     <div class="cl-toolbar">
       <span class="cl-chip-group-label" style="margin:0 2px 0 0;"><span class="sym">$</span>fiscal year</span>
       <div class="cl-tags" id="cl-years">
-        <button class="cl-tag-btn active" data-year="all">all (39)</button>
-        <button class="cl-tag-btn" data-year="2024">FY2024 (19)</button>
-        <button class="cl-tag-btn" data-year="2025">FY2025 (14)</button>
-        <button class="cl-tag-btn" data-year="2026">FY2026 (17)</button>
+        <button class="cl-tag-btn active" data-year="all" aria-pressed="true">all (39)</button>
+        <button class="cl-tag-btn" data-year="2024" aria-pressed="false">FY2024 (19)</button>
+        <button class="cl-tag-btn" data-year="2025" aria-pressed="false">FY2025 (14)</button>
+        <button class="cl-tag-btn" data-year="2026" aria-pressed="false">FY2026 (17)</button>
       </div>
     </div>
 
     <div class="cl-grid" id="cl-grid">
 
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ebs" data-title="terminate ebs" data-desc="deleted unused ebs volumes; multiple teams were affected by shared portal allocation.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="ebs">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">EBS</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">3 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$2,348,040</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="terminate ebs" data-desc="deleted unused ebs volumes; multiple teams were affected by shared portal allocation.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$1,200,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate EBS</p>
+            <p class="cl-entry-desc">Deleted unused EBS volumes; multiple teams were affected by shared portal allocation.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2024,2025,2026" data-title="terminate ebs" data-desc="manually deleted ebs volumes that decommission automation had missed, then fixed the automation.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024–2026</span>
+              <span class="cl-entry-amount">$1,100,040</span>
+            </div>
+            <p class="cl-entry-title">Terminate EBS</p>
+            <p class="cl-entry-desc">Manually deleted EBS volumes that decommission automation had missed, then fixed the automation.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2026" data-title="terminate ebs" data-desc="manually deleted ebs volumes that decommission automation had missed, then fixed the automation.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$48,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate EBS</p>
+            <p class="cl-entry-desc">Manually deleted EBS volumes that decommission automation had missed, then fixed the automation.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EBS</h3>
-          <p class="cl-card-desc">Deleted unused EBS volumes; multiple teams were affected by shared portal allocation.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$1,200,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2026" data-service="premium-files" data-title="terminate premium files" data-desc="fixed a cleanup script bug that was skipping premium files, then cleaned up the backlog.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="premium-files">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Premium Files</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$1,170,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2026" data-title="terminate premium files" data-desc="fixed a cleanup script bug that was skipping premium files, then cleaned up the backlog.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$1,170,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Premium Files</p>
+            <p class="cl-entry-desc">Fixed a cleanup script bug that was skipping premium files, then cleaned up the backlog.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Premium Files</h3>
-          <p class="cl-card-desc">Fixed a cleanup script bug that was skipping premium files, then cleaned up the backlog.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$1,170,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024,2025,2026" data-service="ebs" data-title="terminate ebs" data-desc="manually deleted ebs volumes that decommission automation had missed, then fixed the automation.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024–2026</span>
+      <details class="cl-card cl-service-card" data-service="rds">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">RDS</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">4 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$1,142,400</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024,2025,2026" data-title="terminate rds" data-desc="decommissioned idle rds instances.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024–2026</span>
+              <span class="cl-entry-amount">$863,400</span>
+            </div>
+            <p class="cl-entry-title">Terminate RDS</p>
+            <p class="cl-entry-desc">Decommissioned idle RDS instances.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="rightsize rds" data-desc="rightsized rds databases to reduce over-provisioned capacity.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$204,000</span>
+            </div>
+            <p class="cl-entry-title">Rightsize RDS</p>
+            <p class="cl-entry-desc">Rightsized RDS databases to reduce over-provisioned capacity.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2025,2026" data-title="modernize rds" data-desc="upgraded rds to a newer version to avoid extended support costs.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025–2026</span>
+              <span class="cl-entry-amount">$39,000</span>
+            </div>
+            <p class="cl-entry-title">Modernize RDS</p>
+            <p class="cl-entry-desc">Upgraded RDS to a newer version to avoid extended support costs.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2025" data-title="terminate rds" data-desc="terminated rds instances flagged for decommission via internal change tickets.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$36,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate RDS</p>
+            <p class="cl-entry-desc">Terminated RDS instances flagged for decommission via internal change tickets.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EBS</h3>
-          <p class="cl-card-desc">Manually deleted EBS volumes that decommission automation had missed, then fixed the automation.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$1,100,040</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024,2026" data-service="efs" data-title="terminate efs" data-desc="terminated unattached/orphaned efs file systems.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024, FY2026</span>
+      <details class="cl-card cl-service-card" data-service="efs">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">EFS</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$924,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024,2026" data-title="terminate efs" data-desc="terminated unattached/orphaned efs file systems.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024, FY2026</span>
+              <span class="cl-entry-amount">$924,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate EFS</p>
+            <p class="cl-entry-desc">Terminated unattached/orphaned EFS file systems.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EFS</h3>
-          <p class="cl-card-desc">Terminated unattached/orphaned EFS file systems.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$924,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2024,2025" data-service="backup" data-title="terminate backup" data-desc="tracked down and deleted old compute backups; put a retention policy in place.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2024–2025</span>
+      <details class="cl-card cl-service-card" data-service="backup">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Backup</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$910,200</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2024,2025" data-title="terminate backup" data-desc="tracked down and deleted old compute backups; put a retention policy in place.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024–2025</span>
+              <span class="cl-entry-amount">$910,200</span>
+            </div>
+            <p class="cl-entry-title">Terminate Backup</p>
+            <p class="cl-entry-desc">Tracked down and deleted old compute backups; put a retention policy in place.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Backup</h3>
-          <p class="cl-card-desc">Tracked down and deleted old compute backups; put a retention policy in place.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$910,200</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024,2025,2026" data-service="rds" data-title="terminate rds" data-desc="decommissioned idle rds instances.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024–2026</span>
+      <details class="cl-card cl-service-card" data-service="ec2">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">EC2</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">3 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$831,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="add instance scheduler to ec2" data-desc="implemented 24x7 environment shutdown for idle resources.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$408,000</span>
+            </div>
+            <p class="cl-entry-title">Add instance scheduler to EC2</p>
+            <p class="cl-entry-desc">Implemented 24x7 environment shutdown for idle resources.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2025" data-title="terminate ec2" data-desc="implemented 24x5 and 24x7 keep-alive scheduling.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$372,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate EC2</p>
+            <p class="cl-entry-desc">Implemented 24x5 and 24x7 keep-alive scheduling.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="terminate ec2" data-desc="terminated idle, unused ec2 instances.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$51,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate EC2</p>
+            <p class="cl-entry-desc">Terminated idle, unused EC2 instances.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate RDS</h3>
-          <p class="cl-card-desc">Decommissioned idle RDS instances.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$863,400</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ebs-snapshots" data-title="terminate ebs snapshots" data-desc="deleted old, orphaned snapshots and implemented a retention policy.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="ebs-snapshots">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">EBS Snapshots</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$699,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="terminate ebs snapshots" data-desc="deleted old, orphaned snapshots and implemented a retention policy.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$699,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate EBS Snapshots</p>
+            <p class="cl-entry-desc">Deleted old, orphaned snapshots and implemented a retention policy.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EBS Snapshots</h3>
-          <p class="cl-card-desc">Deleted old, orphaned snapshots and implemented a retention policy.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$699,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024,2026" data-service="aws-backup" data-title="terminate aws backup" data-desc="terminated backups of unattached efs file systems and reviewed/deleted backups with &quot;always&quot; recovery points.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024, FY2026</span>
+      <details class="cl-card cl-service-card" data-service="aws-backup">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">AWS Backup</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$636,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024,2026" data-title="terminate aws backup" data-desc="terminated backups of unattached efs file systems and reviewed/deleted backups with &quot;always&quot; recovery points.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024, FY2026</span>
+              <span class="cl-entry-amount">$636,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate AWS Backup</p>
+            <p class="cl-entry-desc">Terminated backups of unattached EFS file systems and reviewed/deleted backups with &quot;always&quot; recovery points.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate AWS Backup</h3>
-          <p class="cl-card-desc">Terminated backups of unattached EFS file systems and reviewed/deleted backups with &quot;always&quot; recovery points.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$636,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2025" data-service="defender-for-containers" data-title="terminate defender for containers" data-desc="replaced microsoft defender for cloud coverage with wiz.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2025</span>
+      <details class="cl-card cl-service-card" data-service="postgres-database">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Postgres Database</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">2 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$630,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2024" data-title="rightsize postgres database" data-desc="rightsized postgres databases to match actual utilization.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$480,000</span>
+            </div>
+            <p class="cl-entry-title">Rightsize Postgres Database</p>
+            <p class="cl-entry-desc">Rightsized Postgres databases to match actual utilization.</p>
+          </div>
+          <div class="cl-entry" data-provider="azure" data-years="2026" data-title="terminate postgres database" data-desc="terminated orphaned msai instances and cleaned up unused resource groups (pingfederate, ingress, navigate) and a postgres database.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$150,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Postgres Database</p>
+            <p class="cl-entry-desc">Terminated orphaned MSAI instances and cleaned up unused resource groups (PingFederate, Ingress, Navigate) and a Postgres database.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Defender for Containers</h3>
-          <p class="cl-card-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$578,520</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2026" data-service="snapshots" data-title="terminate snapshots" data-desc="cleaned up orphaned snapshots older than 90 days and unused amis.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="defender-for-containers">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Defender for Containers</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$578,520</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2025" data-title="terminate defender for containers" data-desc="replaced microsoft defender for cloud coverage with wiz.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$578,520</span>
+            </div>
+            <p class="cl-entry-title">Terminate Defender for Containers</p>
+            <p class="cl-entry-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Snapshots</h3>
-          <p class="cl-card-desc">Cleaned up orphaned snapshots older than 90 days and unused AMIs.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$531,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2024" data-service="postgres-database" data-title="rightsize postgres database" data-desc="rightsized postgres databases to match actual utilization.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="snapshots">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Snapshots</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">2 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$573,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2026" data-title="terminate snapshots" data-desc="cleaned up orphaned snapshots older than 90 days and unused amis.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$531,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Snapshots</p>
+            <p class="cl-entry-desc">Cleaned up orphaned snapshots older than 90 days and unused AMIs.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2026" data-title="terminate snapshots" data-desc="cleaned up orphaned snapshots older than 90 days and unused amis.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$42,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Snapshots</p>
+            <p class="cl-entry-desc">Cleaned up orphaned snapshots older than 90 days and unused AMIs.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Rightsize Postgres Database</h3>
-          <p class="cl-card-desc">Rightsized Postgres databases to match actual utilization.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$480,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2024,2026" data-service="storage" data-title="terminate storage" data-desc="cleaned up premium file storage and fixed a file-lock issue.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2024, FY2026</span>
+      <details class="cl-card cl-service-card" data-service="rds-snapshots">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">RDS Snapshots</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">2 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$570,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2026" data-title="terminate rds snapshots" data-desc="reduced rds backup retention to 0 after migrating backup policy to aws backup.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$354,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate RDS Snapshots</p>
+            <p class="cl-entry-desc">Reduced RDS backup retention to 0 after migrating backup policy to AWS Backup.</p>
+          </div>
+          <div class="cl-entry" data-provider="aws" data-years="2026" data-title="terminate rds snapshots" data-desc="implemented automation for orphaned rds snapshot cleanup.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$216,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate RDS Snapshots</p>
+            <p class="cl-entry-desc">Implemented automation for orphaned RDS snapshot cleanup.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Storage</h3>
-          <p class="cl-card-desc">Cleaned up premium file storage and fixed a file-lock issue.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$450,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2024,2025,2026" data-service="disk" data-title="terminate disk" data-desc="cleaned up orphaned disks.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2024–2026</span>
+      <details class="cl-card cl-service-card" data-service="storage">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Storage</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$450,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2024,2026" data-title="terminate storage" data-desc="cleaned up premium file storage and fixed a file-lock issue.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024, FY2026</span>
+              <span class="cl-entry-amount">$450,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Storage</p>
+            <p class="cl-entry-desc">Cleaned up premium file storage and fixed a file-lock issue.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Disk</h3>
-          <p class="cl-card-desc">Cleaned up orphaned disks.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$412,200</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ec2" data-title="add instance scheduler to ec2" data-desc="implemented 24x7 environment shutdown for idle resources.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="disk">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Disk</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$412,200</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2024,2025,2026" data-title="terminate disk" data-desc="cleaned up orphaned disks.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024–2026</span>
+              <span class="cl-entry-amount">$412,200</span>
+            </div>
+            <p class="cl-entry-title">Terminate Disk</p>
+            <p class="cl-entry-desc">Cleaned up orphaned disks.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Add instance scheduler to EC2</h3>
-          <p class="cl-card-desc">Implemented 24x7 environment shutdown for idle resources.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$408,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2025" data-service="ec2" data-title="terminate ec2" data-desc="implemented 24x5 and 24x7 keep-alive scheduling.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2025</span>
+      <details class="cl-card cl-service-card" data-service="defender-for-cloud">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Defender for Cloud</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$348,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2025" data-title="terminate defender for cloud" data-desc="replaced microsoft defender for cloud coverage with wiz.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$348,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Defender for Cloud</p>
+            <p class="cl-entry-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EC2</h3>
-          <p class="cl-card-desc">Implemented 24x5 and 24x7 keep-alive scheduling.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$372,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2026" data-service="rds-snapshots" data-title="terminate rds snapshots" data-desc="reduced rds backup retention to 0 after migrating backup policy to aws backup.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="s3">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">S3</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$333,600</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2026" data-title="terminate s3" data-desc="terminated old backup buckets, standardized s3 lifecycle policy across all buckets, and cleaned up customer storage under the new policy.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$333,600</span>
+            </div>
+            <p class="cl-entry-title">Terminate S3</p>
+            <p class="cl-entry-desc">Terminated old backup buckets, standardized S3 lifecycle policy across all buckets, and cleaned up customer storage under the new policy.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate RDS Snapshots</h3>
-          <p class="cl-card-desc">Reduced RDS backup retention to 0 after migrating backup policy to AWS Backup.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$354,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2025" data-service="defender-for-cloud" data-title="terminate defender for cloud" data-desc="replaced microsoft defender for cloud coverage with wiz.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2025</span>
+      <details class="cl-card cl-service-card" data-service="environments">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Environments</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$252,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="terminate environments" data-desc="removed non-compliant customer environments.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$252,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Environments</p>
+            <p class="cl-entry-desc">Removed non-compliant customer environments.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Defender for Cloud</h3>
-          <p class="cl-card-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$348,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2026" data-service="s3" data-title="terminate s3" data-desc="terminated old backup buckets, standardized s3 lifecycle policy across all buckets, and cleaned up customer storage under the new policy.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="defender-for-servers">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Defender for Servers</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$208,800</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2025" data-title="terminate defender for servers" data-desc="replaced microsoft defender for cloud coverage with wiz.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$208,800</span>
+            </div>
+            <p class="cl-entry-title">Terminate Defender for Servers</p>
+            <p class="cl-entry-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate S3</h3>
-          <p class="cl-card-desc">Terminated old backup buckets, standardized S3 lifecycle policy across all buckets, and cleaned up customer storage under the new policy.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$333,600</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="environments" data-title="terminate environments" data-desc="removed non-compliant customer environments.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="virtual-network">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Virtual Network</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$180,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2026" data-title="modernize virtual network" data-desc="optimized database peering configuration that was incurring extra cross-vnet cost.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$180,000</span>
+            </div>
+            <p class="cl-entry-title">Modernize Virtual Network</p>
+            <p class="cl-entry-desc">Optimized database peering configuration that was incurring extra cross-VNET cost.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Environments</h3>
-          <p class="cl-card-desc">Removed non-compliant customer environments.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$252,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2026" data-service="rds-snapshots" data-title="terminate rds snapshots" data-desc="implemented automation for orphaned rds snapshot cleanup.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="ami">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">AMI</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$122,400</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2025" data-title="terminate ami" data-desc="traced and terminated orphaned/old amis that weren't attached to any running ec2 instance.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$122,400</span>
+            </div>
+            <p class="cl-entry-title">Terminate AMI</p>
+            <p class="cl-entry-desc">Traced and terminated orphaned/old AMIs that weren't attached to any running EC2 instance.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate RDS Snapshots</h3>
-          <p class="cl-card-desc">Implemented automation for orphaned RDS snapshot cleanup.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$216,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2025" data-service="defender-for-servers" data-title="terminate defender for servers" data-desc="replaced microsoft defender for cloud coverage with wiz.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2025</span>
+      <details class="cl-card cl-service-card" data-service="vm">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">VM</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">2 initiatives</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$110,400</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2025" data-title="auto-shutdown vm" data-desc="implemented weekend auto-shutdown for non-production vms.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$57,600</span>
+            </div>
+            <p class="cl-entry-title">Auto-shutdown VM</p>
+            <p class="cl-entry-desc">Implemented weekend auto-shutdown for non-production VMs.</p>
+          </div>
+          <div class="cl-entry" data-provider="azure" data-years="2025" data-title="auto-shutdown vm" data-desc="implemented daily auto-shutdown for non-production vms.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$52,800</span>
+            </div>
+            <p class="cl-entry-title">Auto-shutdown VM</p>
+            <p class="cl-entry-desc">Implemented daily auto-shutdown for non-production VMs.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Defender for Servers</h3>
-          <p class="cl-card-desc">Replaced Microsoft Defender for Cloud coverage with Wiz.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$208,800</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="rds" data-title="rightsize rds" data-desc="rightsized rds databases to reduce over-provisioned capacity.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="ahub">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">AHUB</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$96,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2024" data-title="enable linux byol (azure hybrid benefit)" data-desc="implemented linux byol (azure hybrid benefit) for the vm auto-assessment process.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$96,000</span>
+            </div>
+            <p class="cl-entry-title">Enable Linux BYOL (Azure Hybrid Benefit)</p>
+            <p class="cl-entry-desc">Implemented Linux BYOL (Azure Hybrid Benefit) for the VM auto-assessment process.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Rightsize RDS</h3>
-          <p class="cl-card-desc">Rightsized RDS databases to reduce over-provisioned capacity.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$204,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2026" data-service="virtual-network" data-title="modernize virtual network" data-desc="optimized database peering configuration that was incurring extra cross-vnet cost.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="eks">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">k8s</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">EKS</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$78,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="k8s" data-years="2024" data-title="rightsize eks" data-desc="rightsized eks node groups to match actual workload demand.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$78,000</span>
+            </div>
+            <p class="cl-entry-title">Rightsize EKS</p>
+            <p class="cl-entry-desc">Rightsized EKS node groups to match actual workload demand.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Modernize Virtual Network</h3>
-          <p class="cl-card-desc">Optimized database peering configuration that was incurring extra cross-VNET cost.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$180,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2026" data-service="postgres-database" data-title="terminate postgres database" data-desc="terminated orphaned msai instances and cleaned up unused resource groups (pingfederate, ingress, navigate) and a postgres database.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2026</span>
+      <details class="cl-card cl-service-card" data-service="eip">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">EIP</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$61,800</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="terminate eip" data-desc="terminated unattached elastic ips.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$61,800</span>
+            </div>
+            <p class="cl-entry-title">Terminate EIP</p>
+            <p class="cl-entry-desc">Terminated unattached Elastic IPs.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Postgres Database</h3>
-          <p class="cl-card-desc">Terminated orphaned MSAI instances and cleaned up unused resource groups (PingFederate, Ingress, Navigate) and a Postgres database.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$150,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2025" data-service="ami" data-title="terminate ami" data-desc="traced and terminated orphaned/old amis that weren't attached to any running ec2 instance.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2025</span>
+      <details class="cl-card cl-service-card" data-service="application-gateway">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Application Gateway</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$39,600</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2026" data-title="terminate application gateway" data-desc="deleted orphaned application gateways from non-production environments.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2026</span>
+              <span class="cl-entry-amount">$39,600</span>
+            </div>
+            <p class="cl-entry-title">Terminate Application Gateway</p>
+            <p class="cl-entry-desc">Deleted orphaned application gateways from non-production environments.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate AMI</h3>
-          <p class="cl-card-desc">Traced and terminated orphaned/old AMIs that weren't attached to any running EC2 instance.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$122,400</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="azure" data-years="2024" data-service="ahub" data-title="enable linux byol (azure hybrid benefit)" data-desc="implemented linux byol (azure hybrid benefit) for the vm auto-assessment process.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="network---public-ip">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Network - Public IP</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$25,200</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2024" data-title="terminate network - public ip" data-desc="terminated an unattached public ip.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$25,200</span>
+            </div>
+            <p class="cl-entry-title">Terminate Network - Public IP</p>
+            <p class="cl-entry-desc">Terminated an unattached public IP.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Enable Linux BYOL (Azure Hybrid Benefit)</h3>
-          <p class="cl-card-desc">Implemented Linux BYOL (Azure Hybrid Benefit) for the VM auto-assessment process.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$96,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="k8s" data-years="2024" data-service="eks" data-title="rightsize eks" data-desc="rightsized eks node groups to match actual workload demand.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">k8s · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="network-peering">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">azure</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">Network Peering</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$18,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="azure" data-years="2025" data-title="terminate network peering" data-desc="fixed a cross-region network peering misconfiguration.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2025</span>
+              <span class="cl-entry-amount">$18,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate Network Peering</p>
+            <p class="cl-entry-desc">Fixed a cross-region network peering misconfiguration.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Rightsize EKS</h3>
-          <p class="cl-card-desc">Rightsized EKS node groups to match actual workload demand.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$78,000</div>
-        </div>
-      </div>
+      </details>
 
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="eip" data-title="terminate eip" data-desc="terminated unattached elastic ips.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
+      <details class="cl-card cl-service-card" data-service="elb">
+        <summary class="cl-service-summary">
+          <div class="cl-card-bar">
+            <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
+            <span class="cl-provider">aws</span>
+          </div>
+          <div class="cl-service-main">
+            <div class="cl-service-title-row">
+              <h3 class="cl-card-title">ELB</h3>
+              <span class="cl-chevron" aria-hidden="true">&#9662;</span>
+            </div>
+            <div class="cl-service-meta">
+              <span class="cl-service-count">1 initiative</span>
+              <div class="cl-savings"><span class="lbl">total saved</span>$9,000</div>
+            </div>
+          </div>
+        </summary>
+        <div class="cl-service-entries">
+          <div class="cl-entry" data-provider="aws" data-years="2024" data-title="terminate elb" data-desc="deleted an inactive load balancer.">
+            <div class="cl-entry-top">
+              <span class="cl-entry-period">FY2024</span>
+              <span class="cl-entry-amount">$9,000</span>
+            </div>
+            <p class="cl-entry-title">Terminate ELB</p>
+            <p class="cl-entry-desc">Deleted an inactive load balancer.</p>
+          </div>
         </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EIP</h3>
-          <p class="cl-card-desc">Terminated unattached Elastic IPs.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$61,800</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2025" data-service="vm" data-title="auto-shutdown vm" data-desc="implemented weekend auto-shutdown for non-production vms.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2025</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Auto-shutdown VM</h3>
-          <p class="cl-card-desc">Implemented weekend auto-shutdown for non-production VMs.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$57,600</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2025" data-service="vm" data-title="auto-shutdown vm" data-desc="implemented daily auto-shutdown for non-production vms.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2025</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Auto-shutdown VM</h3>
-          <p class="cl-card-desc">Implemented daily auto-shutdown for non-production VMs.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$52,800</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="ec2" data-title="terminate ec2" data-desc="terminated idle, unused ec2 instances.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EC2</h3>
-          <p class="cl-card-desc">Terminated idle, unused EC2 instances.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$51,000</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2026" data-service="ebs" data-title="terminate ebs" data-desc="manually deleted ebs volumes that decommission automation had missed, then fixed the automation.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2026</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate EBS</h3>
-          <p class="cl-card-desc">Manually deleted EBS volumes that decommission automation had missed, then fixed the automation.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$48,000</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2026" data-service="snapshots" data-title="terminate snapshots" data-desc="cleaned up orphaned snapshots older than 90 days and unused amis.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2026</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Snapshots</h3>
-          <p class="cl-card-desc">Cleaned up orphaned snapshots older than 90 days and unused AMIs.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$42,000</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2026" data-service="application-gateway" data-title="terminate application gateway" data-desc="deleted orphaned application gateways from non-production environments.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2026</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Application Gateway</h3>
-          <p class="cl-card-desc">Deleted orphaned application gateways from non-production environments.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$39,600</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="aws" data-years="2025,2026" data-service="rds" data-title="modernize rds" data-desc="upgraded rds to a newer version to avoid extended support costs.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2025–2026</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Modernize RDS</h3>
-          <p class="cl-card-desc">Upgraded RDS to a newer version to avoid extended support costs.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$39,000</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="aws" data-years="2025" data-service="rds" data-title="terminate rds" data-desc="terminated rds instances flagged for decommission via internal change tickets.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2025</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate RDS</h3>
-          <p class="cl-card-desc">Terminated RDS instances flagged for decommission via internal change tickets.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$36,000</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2024" data-service="network---public-ip" data-title="terminate network - public ip" data-desc="terminated an unattached public ip.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2024</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Network - Public IP</h3>
-          <p class="cl-card-desc">Terminated an unattached public IP.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$25,200</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="azure" data-years="2025" data-service="network-peering" data-title="terminate network peering" data-desc="fixed a cross-region network peering misconfiguration.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">azure · FY2025</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate Network Peering</h3>
-          <p class="cl-card-desc">Fixed a cross-region network peering misconfiguration.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$18,000</div>
-        </div>
-      </div>
-
-      <div class="cl-card" data-provider="aws" data-years="2024" data-service="elb" data-title="terminate elb" data-desc="deleted an inactive load balancer.">
-        <div class="cl-card-bar">
-          <div class="cl-card-bar-dots"><span class="cl-dot r"></span><span class="cl-dot y"></span><span class="cl-dot g"></span></div>
-          <span class="cl-provider">aws · FY2024</span>
-        </div>
-        <div class="cl-card-body">
-          <h3 class="cl-card-title">Terminate ELB</h3>
-          <p class="cl-card-desc">Deleted an inactive load balancer.</p>
-        </div>
-        <div class="cl-card-foot">
-          <div class="cl-savings"><span class="lbl">total saved</span>$9,000</div>
-        </div>
-      </div>
+      </details>
 
     </div>
 
@@ -973,12 +1335,10 @@
 
   </div>
 
-  <div class="cl-lightbox" id="cl-lightbox" hidden><img id="cl-lightbox-img" src="" /></div>
-
 <script>
 (function () {
   var grid = document.getElementById('cl-grid');
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.cl-card'));
+  var groups = Array.prototype.slice.call(grid.querySelectorAll('.cl-service-card'));
   var search = document.getElementById('cl-search');
   var tagButtons = document.querySelectorAll('#cl-tags .cl-tag-btn');
   var yearButtons = document.querySelectorAll('#cl-years .cl-tag-btn');
@@ -992,17 +1352,31 @@
   function applyFilter() {
     var q = search.value.trim().toLowerCase();
     var svc = serviceSelect.value;
+    var filtering = !!q || activeTag !== 'all' || activeYear !== 'all' || svc !== 'all';
     var visibleCount = 0;
-    cards.forEach(function (card) {
-      var matchesTag = activeTag === 'all' || card.dataset.provider === activeTag;
-      var cardYears = card.dataset.years ? card.dataset.years.split(',') : [];
-      var matchesYear = activeYear === 'all' || cardYears.indexOf(activeYear) !== -1;
-      var matchesService = svc === 'all' || card.dataset.service === svc;
-      var matchesQuery = !q || card.dataset.title.indexOf(q) !== -1 || card.dataset.desc.indexOf(q) !== -1;
-      var show = matchesTag && matchesYear && matchesService && matchesQuery;
-      card.style.display = show ? '' : 'none';
-      if (show) visibleCount++;
+
+    groups.forEach(function (group) {
+      var matchesService = svc === 'all' || group.dataset.service === svc;
+      var entries = Array.prototype.slice.call(group.querySelectorAll('.cl-entry'));
+      var groupVisible = 0;
+
+      entries.forEach(function (entry) {
+        var matchesTag = activeTag === 'all' || entry.dataset.provider === activeTag;
+        var entryYears = entry.dataset.years ? entry.dataset.years.split(',') : [];
+        var matchesYear = activeYear === 'all' || entryYears.indexOf(activeYear) !== -1;
+        var matchesQuery = !q || entry.dataset.title.indexOf(q) !== -1 || entry.dataset.desc.indexOf(q) !== -1;
+        var show = matchesService && matchesTag && matchesYear && matchesQuery;
+        entry.style.display = show ? '' : 'none';
+        if (show) groupVisible++;
+      });
+
+      group.style.display = (matchesService && groupVisible > 0) ? '' : 'none';
+      if (filtering) {
+        group.open = groupVisible > 0;
+      }
+      visibleCount += groupVisible;
     });
+
     statVisible.textContent = visibleCount;
     empty.hidden = visibleCount !== 0;
 
@@ -1016,8 +1390,9 @@
 
   tagButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      tagButtons.forEach(function (b) { b.classList.remove('active'); });
+      tagButtons.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
       btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       activeTag = btn.dataset.tag;
       applyFilter();
     });
@@ -1025,8 +1400,9 @@
 
   yearButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      yearButtons.forEach(function (b) { b.classList.remove('active'); });
+      yearButtons.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
       btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       activeYear = btn.dataset.year;
       applyFilter();
     });
@@ -1039,16 +1415,6 @@
       applyFilter();
     });
   });
-
-  var lightbox = document.getElementById('cl-lightbox');
-  var lightboxImg = document.getElementById('cl-lightbox-img');
-  document.querySelectorAll('[data-view-img]').forEach(function (img) {
-    img.addEventListener('click', function () {
-      lightboxImg.src = img.getAttribute('src');
-      lightbox.hidden = false;
-    });
-  });
-  lightbox.addEventListener('click', function () { lightbox.hidden = true; });
 
   applyFilter();
 })();
